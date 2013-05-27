@@ -1,0 +1,22 @@
+#!/bin/bash
+
+rm ~/.ssh/known_hosts -f
+password="ename110"
+
+for host in `cat ip.txt`; do
+    expect -c "
+        spawn scp ./ch_ip.sh root@$host:~
+        expect {
+           \"yes/no\" { send \"yes\r\";exp_continue; }
+           \"assword:\" { send \"$password\r\"; }
+        }
+expect eof
+"
+    expect -c "
+        spawn ssh -lroot $host \"bash /root/ch_ip.sh&&rm -f /root/ch_ip.sh&&service network restart\"
+        expect {
+            \"assword:\" { send \"$password\r\"; }
+        }
+        expect eof
+"
+done
